@@ -1,0 +1,6 @@
+# RepeatingLines.txt
+# the next line will be repeated twice
+D:\project\Slash\test_addition.py # repeat: 2
+D:\project\Slash\test_parameters.py # filter: not dangerous, repeat: 2
+
+# slash run -v -f RepeatingLines.txt

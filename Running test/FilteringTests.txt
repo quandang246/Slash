@@ -1,0 +1,7 @@
+# FilteringTests.txt
+# this is the first test file
+D:\project\Slash\test_parameters.py
+# when running the following file, tests with "dangerous" in their name will not be loaded
+D:\project\Slash\test_addition.py 
+
+# slash run -v -f FilteringTests.txt
