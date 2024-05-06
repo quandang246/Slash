@@ -1,0 +1,72 @@
+# file: .slashrc
+
+import os
+import slash
+import gossip
+import shutil
+
+import slash.plugins
+
+
+# Goal1: Have logging always turned on in a fixed location (Say ~/slash_logs)
+# modifying the global Slash configuration to 
+slash.config.root.log.root = os.path.expanduser('~/slash_logs')
+
+
+# Goal3a: Organizing Customizations in Plugins
+# define LogCollectorPlugin that deriving from slash.plugins.PluginInterface
+class LogCollectionPlugin(slash.plugins.PluginInterface):
+
+    def get_name(self):
+        return 'logcollector'
+    
+    def session_end(self):
+        shutil.copytree(
+            slash.session.logging.session_log_path,
+            os.path.join('/remote/path', slash.session.id)
+        )
+
+
+# Goal4: Passing Command-Line Arguments to Plugins
+class ProductTestingPlugin(slash.plugins.PluginInterface):
+
+    def get_name(self):
+        return 'product'
+    
+    # Goal5: Configuration Extensions
+    def get_default_config(self):
+        return {'api_timeout_seconds': 50}
+
+    def configure_argument_parser(self, parser):
+        parser.add_argument('-t', '--tagert',
+                            help='ip address of the target to test')
+        
+    def configure_from_parsed_args(self, args):
+        self.target_address = args.target
+
+    def session_start(self):
+        slash.g.target = Target(self.target_address, timeout=slash.config.root.plugin_config.produt.api_timeout_seconds)    # Need real implementation of Target class    
+
+
+# Goal2: Collect execution logs at the end of each session, and copy them to a central location (Say /remote/path).
+# Use gossip.register to register our callback 
+"""
+@gossip.register('slash.session_end')                   # uses gossip to implement hooks that happens when session ends.
+def collect_logs():
+    shutil.copytree(                                    # Copying tree     
+        slash.session.logging.session_log_path,         # src path
+        os.path.join('/remote/path', slash.session.id)  # dst path
+    )
+"""
+
+
+# Goal3b: Install and Activate the plugins
+# install plugin 
+collector_plugin = LogCollectionPlugin()
+slash.plugins.manager.install(collector_plugin)
+# Run or active plugins by pass --with-<lugin_name> to it. For example --with-logcollector
+# Active by default
+slash.plugins.manager.activate(collector_plugin)
+# or just pass activate=True in the call to install will result the same
+# slash.plugins.manager.install(collector_plugin, activate=True)
+
