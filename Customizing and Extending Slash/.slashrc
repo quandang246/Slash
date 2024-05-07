@@ -10,7 +10,7 @@ import slash.plugins
 
 # Goal1: Have logging always turned on in a fixed location (Say ~/slash_logs)
 # modifying the global Slash configuration to 
-slash.config.root.log.root = os.path.expanduser('~/slash_logs')
+slash.config.root.log.root = r"D:\project\Slash\Customizing and Extending Slash\slash_logs"
 
 
 # Goal3a: Organizing Customizations in Plugins
@@ -21,11 +21,19 @@ class LogCollectionPlugin(slash.plugins.PluginInterface):
         return 'logcollector'
     
     def session_end(self):
-        shutil.copytree(
-            slash.session.logging.session_log_path,
-            os.path.join('/remote/path', slash.session.id)
-        )
+        session_log_path = slash.session.logging.session_log_path
+        session_id = slash.session.id
+        
+        source_path = os.path.abspath(session_log_path)
+        destination_path = os.path.join('C:\\remote\\path', session_id)  # Update the destination path for Windows
 
+        try:
+            if os.path.exists(source_path):  # Check if the source directory exists
+                shutil.copytree(source_path, destination_path)
+            else:
+                print(f"Source directory '{source_path}' does not exist.")
+        except Exception as e:
+            print(f"Error: {e}")
 
 # Goal4: Passing Command-Line Arguments to Plugins
 class ProductTestingPlugin(slash.plugins.PluginInterface):
@@ -38,14 +46,15 @@ class ProductTestingPlugin(slash.plugins.PluginInterface):
         return {'api_timeout_seconds': 50}
 
     def configure_argument_parser(self, parser):
-        parser.add_argument('-t', '--tagert',
+        parser.add_argument('-t', '--target',
                             help='ip address of the target to test')
         
     def configure_from_parsed_args(self, args):
         self.target_address = args.target
 
     def session_start(self):
-        slash.g.target = Target(self.target_address, timeout=slash.config.root.plugin_config.produt.api_timeout_seconds)    # Need real implementation of Target class    
+        print(self.target_address)
+        # slash.g.target = Target(self.target_address, timeout=slash.config.root.plugin_config.produt.api_timeout_seconds)    # Need real implementation of Target class    
 
 
 # Goal2: Collect execution logs at the end of each session, and copy them to a central location (Say /remote/path).
@@ -64,6 +73,10 @@ def collect_logs():
 # install plugin 
 collector_plugin = LogCollectionPlugin()
 slash.plugins.manager.install(collector_plugin)
+
+prodcut_plugin = ProductTestingPlugin()
+slash.plugins.manager.install(prodcut_plugin)
+
 # Run or active plugins by pass --with-<lugin_name> to it. For example --with-logcollector
 # Active by default
 slash.plugins.manager.activate(collector_plugin)
