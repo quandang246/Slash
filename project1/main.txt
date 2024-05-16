@@ -1,0 +1,7 @@
+# FilteringTests.txt
+# We can also add repeat times and filter in this file
+/home/quan246/projects/Slash_framework_tutorial/project1/sum_even.py        # repeat: 2
+/home/quan246/projects/Slash_framework_tutorial/project1/prime_check.py     # filter: not dangerous, repeat: 2
+/home/quan246/projects/Slash_framework_tutorial/project1/csv_handling.py
+
+# slash run -v -f main.txt
